@@ -28,15 +28,10 @@ var StickyAdsTVAdapter = function StickyAdsTVAdapter() {
   function sendBidRequest(bid) {
     var placementCode = bid.placementCode;
 
-    var integrationType = bid.params.format ? bid.params.format : 'inbanner';
-    var urltoLoad = MUSTANG_URL;
-
-    if (integrationType !== 'inbanner') {
-      //  integration types are equals to component ids
-      urltoLoad = OUTSTREAM_URL.replace('[COMP-ID]', integrationType);
-    }
+    var urltoLoad = getUrlToLoad(bid);
 
     var bidRegistered = false;
+
     adloader.loadScript(urltoLoad, function() {
       getBid(bid, function(bidObject) {
         if (!bidRegistered) {
@@ -45,6 +40,33 @@ var StickyAdsTVAdapter = function StickyAdsTVAdapter() {
         }
       });
     }, true);
+  }
+
+  function getUrlToLoad(bid) {
+    var integrationType = bid.params.format ? bid.params.format : 'inbanner';
+    var url = MUSTANG_URL;
+
+    if (integrationType !== 'inbanner') {
+      //  integration types are equals to component ids
+      url = OUTSTREAM_URL.replace('[COMP-ID]', integrationType) + '?'; // there will be at least one parameter
+
+      var config = bid.params;
+
+      // default placement if no placement is set
+      if (!config.hasOwnProperty('domId') && !config.hasOwnProperty('auto') && !config.hasOwnProperty('p') && !config.hasOwnProperty('article')) {
+        config.domId = bid.placementCode;
+      }
+
+      for (var key in config) {
+        // don't send format parameter
+        // neither zone nor vastUrlParams value as Vast is already loaded
+        if (config.hasOwnProperty(key) && key !== 'format' && key !== 'zone' && key !== 'zoneId' && key !== 'vastUrlParams') {
+          url += key + '=' + config[key] + '&';
+        }
+      }
+    }
+
+    return url;
   }
 
   function getBid(bid, callback) {
@@ -145,30 +167,13 @@ var StickyAdsTVAdapter = function StickyAdsTVAdapter() {
   var formatOutstreamHTML = function(bid) {
     var placementCode = bid.placementCode;
 
-    var config = bid.params;
-
-    // default placement if no placement is set
-    if (!config.hasOwnProperty('domId') && !config.hasOwnProperty('auto') && !config.hasOwnProperty('p') && !config.hasOwnProperty('article')) {
-      config.domId = placementCode;
-    }
-
     var script = "<script type='text/javascript'>" +
     // get the top most accessible window
     'var topWindow = (function(){var res=window; try{while(top != res){if(res.parent.location.href.length)res=res.parent;}}catch(e){}return res;})();' +
     'var vast =  topWindow.stickyadstv_cache["' + placementCode + '"];' +
     'var config = {' +
     '  preloadedVast:vast,' +
-    '  ASLoader:topWindow.stickyadstv_asLoader';
-
-    for (var key in config) {
-      // dont' send format parameter
-      // neither zone nor vastUrlParams value as Vast is already loaded
-      if (config.hasOwnProperty(key) && key !== 'format' && key !== 'zone' && key !== 'zoneId' && key !== 'vastUrlParams') {
-        script += ',' + key + ':"' + config[key] + '"';
-      }
-    }
-    script += '};' +
-
+    '  ASLoader:topWindow.stickyadstv_asLoader};' +
     'topWindow.com.stickyadstv.' + getAPIName(bid.params.format) + '.start(config);' +
 
     '</script>';
