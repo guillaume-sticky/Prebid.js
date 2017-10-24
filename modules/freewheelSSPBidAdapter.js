@@ -9,7 +9,6 @@ const FREEWHEEL_ADSSETUP = PROTOCOL + '://ads.stickyadstv.com/www/delivery/swfIn
 const MUSTANG_URL = PROTOCOL + '://cdn.stickyadstv.com/mustang/mustang.min.js';
 const PRIMETIME_URL = PROTOCOL + '://cdn.stickyadstv.com/prime-time/';
 
-
 function getProtocol() {
   if (location.protocol && location.protocol.indexOf('https') === 0) {
     return 'https';
@@ -213,16 +212,15 @@ export const spec = {
     }
 
     var requestParams = {
-      reqType:'AdsSetup',
-      protocolVersion:'2.0',
-      zoneId:this._currentBidRequest.params.zoneId,
-      componentId:getComponentId(this._currentBidRequest.params.format)
+      reqType: 'AdsSetup',
+      protocolVersion: '2.0',
+      zoneId: this._currentBidRequest.params.zoneId,
+      componentId: getComponentId(this._currentBidRequest.params.format)
     };
-
 
     var location = utils.getTopWindowUrl();
     if (isValidUrl(location)) {
-      requestParams.loc=location;
+      requestParams.loc = location;
     }
 
     this._currentPlayerSize = getBiggerSize(this._currentBidRequest.sizes);
@@ -230,11 +228,10 @@ export const spec = {
       requestParams.playerSize = this._currentPlayerSize[0] + 'x' + this._currentPlayerSize[1];
     }
 
-    const payloadString = JSON.stringify(requestParams);
     return {
       method: 'GET',
       url: FREEWHEEL_ADSSETUP,
-      data: payloadString
+      data: requestParams
     };
   },
 
@@ -258,15 +255,15 @@ export const spec = {
     const creativeId = getCreativeId(xmlDoc);
 
     const topWin = getTopMostWindow();
-    if(!topWin.freeheelssp_cache) {
+    if (!topWin.freeheelssp_cache) {
       topWin.freeheelssp_cache = {};
     }
     topWin.freeheelssp_cache[this._currentBidRequest.adUnitCode] = serverResponse;
 
     const bidResponses = [];
 
-    if(princingData.price) {
-        const bidResponse = {
+    if (princingData.price) {
+      const bidResponse = {
         requestId: this._currentBidRequest.bidId,
         bidderCode: this._currentBidRequest.bidder,
         cpm: princingData.price,
@@ -277,8 +274,8 @@ export const spec = {
         netRevenue: true,
         ttl: 360,
         ad: formatAdHTML(this._currentBidRequest, this._currentPlayerSize)
-    };
-    bidResponses.push(bidResponse);
+      };
+      bidResponses.push(bidResponse);
     }
 
     return bidResponses;

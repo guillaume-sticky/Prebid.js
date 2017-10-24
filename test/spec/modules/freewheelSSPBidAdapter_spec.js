@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { spec } from 'modules/freewheelSSPBidAdapter';
 import { newBidder } from 'src/adapters/bidderFactory';
 
-const ENDPOINT = "//ads.stickyadstv.com/www/delivery/swfIndex.php";
+const ENDPOINT = '//ads.stickyadstv.com/www/delivery/swfIndex.php';
 
 describe('freewheelSSP BidAdapter Test', () => {
   const adapter = newBidder(spec);
@@ -17,7 +17,7 @@ describe('freewheelSSP BidAdapter Test', () => {
     let bid = {
       'bidder': 'freewheel-ssp',
       'params': {
-        'zoneId':'277225'
+        'zoneId': '277225'
       },
       'adUnitCode': 'adunit-code',
       'sizes': [[300, 250], [300, 600]],
@@ -34,7 +34,7 @@ describe('freewheelSSP BidAdapter Test', () => {
       let bid = Object.assign({}, bid);
       delete bid.params;
       bid.params = {
-        wrong:'missing zone id'
+        wrong: 'missing zone id'
       };
       expect(spec.isBidRequestValid(bid)).to.equal(false);
     });
@@ -45,7 +45,7 @@ describe('freewheelSSP BidAdapter Test', () => {
       {
         'bidder': 'freewheel-ssp',
         'params': {
-          'zoneId':'277225'
+          'zoneId': '277225'
         },
         'adUnitCode': 'adunit-code',
         'sizes': [[300, 250], [300, 600]],
@@ -58,7 +58,8 @@ describe('freewheelSSP BidAdapter Test', () => {
     it('should add parameters to the tag', () => {
       const request = spec.buildRequests(bidRequests);
       console.log(request.data);
-      const payload = JSON.parse(request.data);
+
+      const payload = request.data;
       expect(payload.reqType).to.equal('AdsSetup');
       expect(payload.protocolVersion).to.equal('2.0');
       expect(payload.zoneId).to.equal('277225');
@@ -71,7 +72,6 @@ describe('freewheelSSP BidAdapter Test', () => {
       expect(request.url).to.contain(ENDPOINT);
       expect(request.method).to.equal('GET');
     });
-
   })
 
   describe('interpretResponse', () => {
@@ -79,7 +79,7 @@ describe('freewheelSSP BidAdapter Test', () => {
       {
         'bidder': 'freewheel-ssp',
         'params': {
-          'zoneId':'277225'
+          'zoneId': '277225'
         },
         'adUnitCode': 'adunit-code',
         'sizes': [[300, 250], [300, 600]],
@@ -93,8 +93,8 @@ describe('freewheelSSP BidAdapter Test', () => {
       {
         'bidder': 'freewheel-ssp',
         'params': {
-          'zoneId':'277225',
-          'format':'floorad'
+          'zoneId': '277225',
+          'format': 'floorad'
         },
         'adUnitCode': 'adunit-code',
         'sizes': [[600, 250], [300, 600]],
@@ -105,8 +105,8 @@ describe('freewheelSSP BidAdapter Test', () => {
       {
         'bidder': 'stickyadstv',
         'params': {
-          'zoneId':'277225',
-          'format':'test'
+          'zoneId': '277225',
+          'format': 'test'
         },
         'adUnitCode': 'adunit-code',
         'sizes': [[300, 600]],
@@ -135,10 +135,9 @@ describe('freewheelSSP BidAdapter Test', () => {
     '    </Extensions>' +
     '  </InLine>' +
     ' </Ad>' +
-    '</VAST>' ;
+    '</VAST>';
 
     let ad = '<div id="freewheelssp_prebid_target"></div><script type=\'text/javascript\'>(function() {  var st = document.createElement(\'script\'); st.type = \'text/javascript\'; st.async = true;  st.src = \'http://cdn.stickyadstv.com/mustang/mustang.min.js\';  st.onload = function(){    var vastLoader = new window.com.stickyadstv.vast.VastLoader();    var vast = vastLoader.getVast();    var topWindow = (function(){var res=window; try{while(top != res){if(res.parent.location.href.length)res=res.parent;}}catch(e){}return res;})();    vast.setXmlString(topWindow.freeheelssp_cache["adunit-code"]);    vastLoader.parseAds(vast, {      onSuccess: function() {var config = {      preloadedVast:vast,      autoPlay:true    };    var ad = new window.com.stickyadstv.vpaid.Ad(document.getElementById("freewheelssp_prebid_target"),config);    (new window.com.stickyadstv.tools.ASLoader(277225, \'mustang\')).registerEvents(ad);    ad.initAd(300,600,"",0,"",""); }    });  };  document.head.appendChild(st);})();</script>';
-    
     let formattedAd = '<div id="freewheelssp_prebid_target"></div><script type=\'text/javascript\'>(function() {  var st = document.createElement(\'script\'); st.type = \'text/javascript\'; st.async = true;  st.src = \'http://cdn.stickyadstv.com/prime-time/floorad.min.js\';  st.onload = function(){    var vastLoader = new window.com.stickyadstv.vast.VastLoader();    var vast = vastLoader.getVast();    var topWindow = (function(){var res=window; try{while(top != res){if(res.parent.location.href.length)res=res.parent;}}catch(e){}return res;})();    vast.setXmlString(topWindow.freeheelssp_cache["adunit-code"]);    vastLoader.parseAds(vast, {      onSuccess: function() {var config = {  preloadedVast:vast,  ASLoader:new window.com.stickyadstv.tools.ASLoader(277225, \'floorad\'),domId:"adunit-code"};window.com.stickyadstv.floorad.start(config); }    });  };  document.head.appendChild(st);})();</script>';
 
     it('should get correct bid response', () => {
@@ -177,46 +176,19 @@ describe('freewheelSSP BidAdapter Test', () => {
           currency: 'EUR',
           netRevenue: true,
           ttl: 360,
-          ad: "TODO"// formatAdHTML(this._currentBidRequest, this._currentPlayerSize)
+          ad: formattedAd
         }
       ];
 
       let result = spec.interpretResponse(response);
-      debugger;
       expect(Object.keys(result[0])).to.deep.equal(Object.keys(expectedResponse[0]));
     });
 
     it('handles nobid responses', () => {
-      let response = '<?xml version=\'1.0\' encoding=\'UTF-8\'?><VAST version=\'2.0\'>' +
-      '</VAST>' ;
+      let response = '<?xml version=\'1.0\' encoding=\'UTF-8\'?><VAST version=\'2.0\'></VAST>';
 
       let result = spec.interpretResponse(response);
       expect(result.length).to.equal(0);
     });
-
-    /*
-    it('handles non-banner media responses', () => {
-      let response = {
-        'tags': [{
-          'uuid': '84ab500420319d',
-          'ads': [{
-            'ad_type': 'video',
-            'cpm': 0.500000,
-            'rtb': {
-              'video': {
-                'content': '<!-- Creative -->'
-              }
-            }
-          }]
-        }]
-      };
-
-      let result = spec.interpretResponse(response);
-      expect(result[0]).to.have.property('vastUrl');
-      expect(result[0]).to.have.property('descriptionUrl');
-      expect(result[0]).to.have.property('mediaType', 'video');
-    });
-    */
-
   });
 });
