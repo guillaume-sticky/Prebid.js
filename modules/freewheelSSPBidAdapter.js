@@ -186,6 +186,7 @@ var getOutstreamScript = function(bid) {
 
 export const spec = {
   code: BIDDER_CODE,
+  supportedMediaTypes: ['video'],
   aliases: ['stickyadstv'], //  former name for freewheel-ssp
   /**
   * Determines whether or not the given bid request is valid.
@@ -272,9 +273,17 @@ export const spec = {
         creativeId: creativeId,
         currency: princingData.currency,
         netRevenue: true,
-        ttl: 360,
-        ad: formatAdHTML(this._currentBidRequest, this._currentPlayerSize)
+        ttl: 360
       };
+
+      var mediaTypes = this._currentBidRequest.mediaTypes || {};
+      if (mediaTypes.video) {
+        bidResponse.vastUrl = 'https//ads.stickyadstv.com/www/delivery/swfIndex.php?reqType=AdsSetup&protocolVersion=2.0&zoneId=2003';
+        bidResponse.mediaType = 'video';
+      } else {
+        bidResponse.ad = formatAdHTML(this._currentBidRequest, this._currentPlayerSize)
+      }
+
       bidResponses.push(bidResponse);
     }
 
